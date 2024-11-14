@@ -1,0 +1,6 @@
+@OnlineStory.Api_HostAddress = http://localhost:5239
+
+GET {{OnlineStory.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

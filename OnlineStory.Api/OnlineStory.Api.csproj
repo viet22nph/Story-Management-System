@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OnlineStory.Application\OnlineStory.Application.csproj" />
+    <ProjectReference Include="..\OnlineStory.Contract\OnlineStory.Contract.csproj" />
+    <ProjectReference Include="..\OnlineStory.Domain\OnlineStory.Domain.csproj" />
+    <ProjectReference Include="..\OnlineStory.Infrastructure.MessageQueue\OnlineStory.Infrastructure.MessageQueue.csproj" />
+    <ProjectReference Include="..\OnlineStory.Infrastructure\OnlineStory.Infrastructure.csproj" />
+    <ProjectReference Include="..\OnlineStory.Persistence\OnlineStory.Persistence.csproj" />
+    <ProjectReference Include="..\OnlineStory.Presentation\OnlineStory.Presentation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\images\" />
+  </ItemGroup>
+
+</Project>
