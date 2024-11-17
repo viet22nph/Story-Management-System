@@ -92,5 +92,4 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid, IdentityUs
     public DbSet<UserStoryTracking> UserStoryTrackings { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<Notification> Notification { get; set; }
-    public DbSet<UserNotification> UserNotifications { get; set; }
 }

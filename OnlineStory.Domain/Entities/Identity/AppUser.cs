@@ -32,8 +32,11 @@ namespace Domain.Entities.Identity
         private readonly List<Comment> _comments;
         public IReadOnlyCollection<Comment> Comments => _comments.AsReadOnly();
 
-        private readonly List<UserNotification> _userNotifications;
-        public IReadOnlyCollection<UserNotification> UserNotifications => _userNotifications.AsReadOnly();
+
+        //private readonly List<UserNotification> _userNotifications;
+        //public IReadOnlyCollection<UserNotification> UserNotifications => _userNotifications.AsReadOnly();
+        private readonly List<Notification> _notifications;
+        public IReadOnlyCollection<Notification> Notifications => _notifications.AsReadOnly();
 
         private readonly List<StoryRecommendations> _storyRecommendations;
         public IReadOnlyCollection<StoryRecommendations> StoryRecommendations => _storyRecommendations.AsReadOnly();
@@ -49,7 +52,7 @@ namespace Domain.Entities.Identity
             UserTokens = new List<IdentityUserToken<Guid>>();
             UserRoles = new List<AppUserRole>();
             _comments = new List<Comment>();
-            _userNotifications = new List<UserNotification>();
+            _notifications = new List<Notification>();
             _userStoryTrackings = new List<UserStoryTracking>();
             _storyRecommendations = new List<StoryRecommendations>();
         }

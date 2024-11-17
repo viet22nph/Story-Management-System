@@ -16,6 +16,11 @@ public class NotificationConfiguration: MappingEntityTypeConfiguration<Notificat
         builder.HasKey(t => t.Id);
         builder.Property(x=> x.Message).HasMaxLength(256).IsRequired();
         builder.Property(x=> x.Type).IsRequired().HasComment("Notification types: NewChapter, Comment, ChapterUpdate, System");
+        builder.HasOne(x=> x.UserReceive)
+            .WithMany(x=> x.Notifications)
+            .HasForeignKey(x=> x.UserReceiveId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("User_Notification");
         builder.Property(x => x.Link).HasMaxLength(500);
         base.Configure(builder);
     }
