@@ -11,4 +11,5 @@ public static class Query
     public record LoginQuery(string UserNameOrEmail, string Password, string Device) : IQuery<LoginResponse>;
 
     public record RefreshTokenQuery(Guid UserId, string RefreshToken, string Device) : IQuery<RefreshTokenResponse>;
+    public record GetMeQuery(Guid UserId): IQuery<UserResponse>;
 }
