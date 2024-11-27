@@ -17,7 +17,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineStory.Infrastructure"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineStory.Presentation", "OnlineStory.Presentation\OnlineStory.Presentation.csproj", "{5792518C-D3C8-42BD-98C2-74362C27205F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineStory.Infrastructure.MessageQueue", "OnlineStory.Infrastructure.MessageQueue\OnlineStory.Infrastructure.MessageQueue.csproj", "{E70F64DC-26BE-4103-81D4-C780B182F313}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineStory.Infrastructure.MessageQueue", "OnlineStory.Infrastructure.MessageQueue\OnlineStory.Infrastructure.MessageQueue.csproj", "{E70F64DC-26BE-4103-81D4-C780B182F313}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2BFF952D-376B-48D0-89CA-97E3BAAF5FB1}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

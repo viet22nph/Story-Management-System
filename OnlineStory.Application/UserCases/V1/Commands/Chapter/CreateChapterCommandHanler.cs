@@ -3,26 +3,25 @@ using Microsoft.AspNetCore.Http;
 using OnlineStory.Application.Abstractions.Services;
 using OnlineStory.Contract.Abstractions.Message;
 using OnlineStory.Contract.Share;
-using OnlineStory.Domain.Abstractions.RepositoryBase;
 using OnlineStory.Domain.Entities;
 using static OnlineStory.Contract.Services.V1.Chapter.Command;
 using OnlineStory.Contract.Share.Errors;
 using OnlineStory.Contract.Extensions;
-using Microsoft.EntityFrameworkCore;
 using OnlineStory.Application.Abstractions;
 using MediatR;
 using static OnlineStory.Contract.Services.V1.Notification.Event;
+using OnlineStory.Contract.Dtos.ChapterDtos;
 
 public class CreateChapterCommandHandler : ICommandHandler<CreateChapterCommand, Success>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IImageStorageService _imageStorageService;
     private readonly IPublisher _publisher;
+    private readonly int _batchSize = 20;
     public CreateChapterCommandHandler(
         IUnitOfWork unitOfWork,
         IImageStorageService imageStorageService,
         IPublisher publisher
-        
         )
     {
         _unitOfWork = unitOfWork;
@@ -45,17 +44,18 @@ public class CreateChapterCommandHandler : ICommandHandler<CreateChapterCommand,
         {
             return Error.Validation(nameof(Chapter.StoryId), "Story id not found.");
         }
-        var images = new List<ChapterImage>();
+    
 
-        var saveImagesResult = await SaveChapterImagesAsync(request.Images, story.StoryTitle.ToSlug(), request.ChapterNumber, images, cancellationToken);
+        var saveImagesResult = await SaveChapterImagesInBatchesAsync(request.Images, story.StoryTitle.ToSlug(), request.ChapterNumber, _batchSize, cancellationToken);
         if (saveImagesResult.IsError)
         {
-            return saveImagesResult; // Return image save errors if any
+            return saveImagesResult.Errors; // Return image save errors if any
         }
+        var images = saveImagesResult.Value;
 
         try
         {
-            var chapter = new Chapter(request.ChapterNumber, request.ChapterTitle, story);
+            var chapter = new Chapter(request.ChapterNumber, request.ChapterTitle, story, request.UserId);
             chapter.AddImageRange(images);
 
             _unitOfWork.ChapterRepository.Add(chapter);
@@ -70,36 +70,50 @@ public class CreateChapterCommandHandler : ICommandHandler<CreateChapterCommand,
         }
     }
 
-    private async Task<Result<Success>> SaveChapterImagesAsync(IFormFileCollection images, string storySlug, int chapterNumber, List<ChapterImage> chapterImages, CancellationToken cancellationToken)
+    private async Task<Result<List<ChapterImage>>> SaveChapterImagesInBatchesAsync(
+    List<ImageDto> images,
+    string storySlug,
+    int chapterNumber,
+    int batchSize,
+    CancellationToken cancellationToken)
     {
+        var batches = images
+        .Select((value, index) => new { value, index })
+        .GroupBy(x => x.index / batchSize)
+        .Select(g => g.Select(x => x.value).ToList());
+        var chapterImages = new List<ChapterImage>();
         var errors = new List<string>();
         var savedImagePaths = new List<string>();
 
-        var tasks = images.Select(async file =>
+        foreach (var batch in batches)
         {
-            var imageSaveResult = await _imageStorageService.SaveImageAsync(file, $"{storySlug}/chuong-{chapterNumber}");
-
-            if (imageSaveResult.IsError)
+            var tasks = batch.Select(async image =>
             {
-                errors.Add($"Failed to save image {file.FileName}: {imageSaveResult.Errors[0].Description}");
-            }
-            else
+                var imageSaveResult = await _imageStorageService.SaveImageAsync(image.File, $"{storySlug}/chuong-{chapterNumber}");
+
+                if (imageSaveResult.IsError)
+                {
+                    errors.Add($"Failed to save image {image.File.FileName}: {imageSaveResult.Errors[0].Description}");
+                }
+                else
+                {
+                    savedImagePaths.Add(imageSaveResult.Value);
+                    chapterImages.Add(new ChapterImage(imageSaveResult.Value, image.Order));
+                }
+            });
+
+            await Task.WhenAll(tasks);
+
+            // Nếu batch gặp lỗi, xóa ảnh đã lưu
+            if (errors.Any())
             {
-                savedImagePaths.Add(imageSaveResult.Value);
-                chapterImages.Add(new ChapterImage(imageSaveResult.Value));
+                var deleteTasks = savedImagePaths.Select(path => _imageStorageService.DeleteImageAsync(path));
+                await Task.WhenAll(deleteTasks);
+
+                return Error.Validation("ImageSaveErrors", string.Join("; ", errors));
             }
-        });
-
-        await Task.WhenAll(tasks);
-
-        if (errors.Any())
-        {
-            var deleteTasks = savedImagePaths.Select(path => _imageStorageService.DeleteImageAsync(path));
-            await Task.WhenAll(deleteTasks);
-
-            return Error.Validation("ImageSaveErrors", string.Join("; ", errors));
         }
 
-        return ResultType.Success;
+        return chapterImages;
     }
 }

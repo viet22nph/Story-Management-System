@@ -6,7 +6,7 @@ using OnlineStory.Domain.Abstractions;
 using OnlineStory.Domain.Abstractions.Entities;
 namespace OnlineStory.Domain.Entities;
 
-public class Chapter : EntityBase<int>, IDateTracking
+public class Chapter : EntityBase<int>, IDateTracking, IUserTracking
 {
     public int ChapterNumber { get; set; }
     public string ChapterTitle { get; set; }
@@ -23,6 +23,8 @@ public class Chapter : EntityBase<int>, IDateTracking
 
     public DateTimeOffset CreatedDate { get; set; }
     public DateTimeOffset? ModifiedDate { get; set; }
+    public Guid CreateBy { get; set; }
+    public Guid? UpdateBy { get; set; }
 
     private Chapter()
     {
@@ -30,7 +32,7 @@ public class Chapter : EntityBase<int>, IDateTracking
         _comments = new List<Comment>();
         _readingHistories = new List<ReadingHistory>();
     }
-    public Chapter(int chapterNumber, string chapterTitle,Story story): this()
+    public Chapter(int chapterNumber, string chapterTitle,Story story, Guid userCreate): this()
     {
         ChapterNumber = chapterNumber;
         ChapterTitle = chapterTitle;

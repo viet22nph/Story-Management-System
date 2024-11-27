@@ -2,10 +2,12 @@
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OnlineStory.Contract.Dtos.ChapterDtos;
+using OnlineStory.Domain.Security;
 using OnlineStory.Presentation.Abstractions;
+using OnlineStory.Presentation.Attributes;
 using static OnlineStory.Contract.Services.V1.Chapter.Command;
 using static OnlineStory.Contract.Services.V1.Chapter.Query;
-
 namespace OnlineStory.Presentation.Controllers;
 
 [Route("api/chapter")]
@@ -14,12 +16,19 @@ public class ChapterController : ApiController
     public ChapterController(ISender sender) : base(sender)
     {
     }
-    
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [HttpPost]
-    public async Task<IActionResult> CreateChapter([FromForm] CreateChapterCommand command)
+    [Consumes("multipart/form-data")]
+    [AppAuthorize(resource:Resources.StoryManager, action:Actions.Create)]
+    public async Task<IActionResult> CreateChapter([FromForm] ChapterCreateRequestDto request)
     {
+        var userId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value;
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        var command = new CreateChapterCommand(request.ChapterNumber, request.ChapterTitle, request.StoryId, request.Images, Guid.Parse(userId));
         var result = await sender.Send(command);
         return result.Match(_ => Created(), Problem);
     }
@@ -54,6 +63,7 @@ public class ChapterController : ApiController
         var result = await sender.Send(query);
         return result.Match(data => Ok(data), Problem);
     }
+
     [HttpGet("{storySlug}/_list")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -66,9 +76,16 @@ public class ChapterController : ApiController
     [HttpPut]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> UpdateChapter([FromForm] UpdateChapterCommand request)
+    [AppAuthorize(resource: Resources.StoryManager, action: Actions.Update)]
+    public async Task<IActionResult> UpdateChapter([FromForm] ChapterUpdateRequestDto request)
     {
-        var result = await sender.Send(request);
+        var userId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value;
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        var command = new UpdateChapterCommand(request.Id, request.ChapterNumber, request.ChapterTitle, request.StoryId, request.Images, Guid.Parse(userId));
+        var result = await sender.Send(command);
         return result.Match(_ => NoContent(), Problem);   
     }
 

@@ -38,13 +38,13 @@ public class NotificationChapterAddedEventHandler : IEventHandler<NotificationCh
         foreach (var follower in followers)
         {
             var existingBatch = existingBatches.FirstOrDefault(b => b.UserReceiveId == follower.UserId);
-            await AddBatchNotificationWithTimeAsync(existingBatch,userId: follower.UserId, notification.StoryId, notification.ChapterTitle, story.StoryTitle);
+            AddBatchNotificationWithTime(existingBatch,userId: follower.UserId, notification.StoryId, notification.ChapterTitle, story.StoryTitle);
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
     }
 
-    private async Task AddBatchNotificationWithTimeAsync(Domain.Entities.Notification existingBatch,Guid userId, Guid storyId, string chapterTitle, string storyTitle)
+    private void AddBatchNotificationWithTime(Domain.Entities.Notification existingBatch,Guid userId, Guid storyId, string chapterTitle, string storyTitle)
     {
       
         if (existingBatch is not null && DateTime.UtcNow - existingBatch.CreatedDate < BatchDuration)
